@@ -7,7 +7,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.11"
-writer = "0.8.2"
+writer-sdk = "1.6.1"
 instructor = "1.7.0"
 python-dotenv = "^1.0.1"
 

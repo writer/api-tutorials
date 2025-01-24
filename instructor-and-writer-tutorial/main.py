@@ -13,7 +13,6 @@ load_dotenv()
 
 writer_client = Writer()
 async_writer_client = AsyncWriter()
-allowed_extensions = [".txt", ".csv", ".pdf"]
 
 # Structure of entities stored in files
 class UserExtract(BaseModel):
@@ -46,6 +45,7 @@ async def handle_file(file_path: str, response_model: Type[BaseModel], output_pa
 
 async def fetch_file_text(file_path: str, name: str, extension: str) -> str:
     # Verifying that extension is supported
+    allowed_extensions = [".txt", ".csv", ".pdf"]
     if extension not in allowed_extensions:
         raise ValueError(f"File extension {extension} is not allowed. Only {', '.join(allowed_extensions)}")
 
@@ -105,19 +105,17 @@ async def repair_data(file_text: str, response_model: Type[BaseModel]) -> List[B
 
 def generate_csv(entities: List[BaseModel], response_model: Type[BaseModel], output_path: str = None) -> None:
     fieldnames = list(response_model.model_json_schema()["properties"].keys())
-
     file_path = f"{response_model.__name__}.csv"
 
     if output_path:
         file_path = output_path + file_path
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
 
-    # Converting pydantic models into CSV format
     with open(file_path, "w") as file:
-        writer = csv.DictWriter(file, fieldnames=fieldnames)
-        writer.writeheader()
+        dict_writer = csv.DictWriter(file, fieldnames=fieldnames)
+        dict_writer.writeheader()
         for entity in entities:
-            writer.writerow(json.loads(response_model(**entity.model_dump()).model_dump_json()))
-
+            dict_writer.writerow(json.loads(response_model(**entity.model_dump()).model_dump_json()))
 
 # Function for handling multiple files asynchronously
 async def main():
